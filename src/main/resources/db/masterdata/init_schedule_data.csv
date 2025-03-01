@@ -1,0 +1,2 @@
+id,schedule_type,cron_expression,description,created_by,created_date,last_modified_by,last_modified_date
+f8f61fa9-530c-4f9b-8b56-0dd7fa802b26,UPDATE_EXPIRED_GIFT_CARD_STATUS,0 0 7 * * ?,Execute the task daily at 7 AM,system,2024-07-09 09:41:00,system,2024-07-09 09:41:00

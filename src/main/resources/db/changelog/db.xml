@@ -1,0 +1,1002 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd">
+    <changeSet id="init_schema" author="bao.le">
+        <sql dbms="postgresql">CREATE EXTENSION pgcrypto;</sql>
+
+        <createTable tableName="groups">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true" />
+            </column>
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+
+        <createTable tableName="service">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="start_price" type="double precision" />
+            <column name="end_price" type="double precision" />
+            <column name="service_price_type" type="varchar(255)" defaultValue="NONE" />
+            <column name="groups_id" type="uuid">
+                <constraints foreignKeyName="fk_service_groups"
+                             referencedTableName="groups"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+        
+        <createTable tableName="role">
+            <column name="id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true" />
+            </column>
+        </createTable>
+
+        <createTable tableName="users">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="first_name" type="varchar(255)" />
+            <column name="last_name" type="varchar(255)" />
+            <column name="user_id" type="varchar(255)">
+                <constraints unique="true" />
+            </column>
+            <column name="phone_number" type="varchar(255)">
+                <constraints nullable="false" unique="true" />
+            </column>
+            <column name="password" type="varchar(255)" />
+            <column name="role_id" type="varchar(255)">
+                <constraints foreignKeyName="fk_users_role"
+                             referencedTableName="role"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+
+        <createTable tableName="orders">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="customer_notes" type="text" />
+            <column name="users_id" type="uuid">
+                <constraints foreignKeyName="fk_orders_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+
+        <createTable tableName="order_details">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="orders_id" type="uuid">
+                <constraints foreignKeyName="fk_order_details_orders"
+                             referencedTableName="orders"
+                             referencedColumnNames="id" />
+            </column>
+
+            <!-- Employee ID -->
+            <column name="users_id" type="uuid">
+                <constraints foreignKeyName="fk_order_details_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="service_id" type="uuid">
+                <constraints foreignKeyName="fk_order_details_service"
+                             referencedTableName="service"
+                             referencedColumnNames="id" />
+            </column>
+            <column name="actual_price" type="double precision" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+
+        <insert tableName="role">
+            <column name="id" value="ROLE_MANAGER" />
+            <column name="name" value="Manager" />
+        </insert>
+        <insert tableName="role">
+            <column name="id" value="ROLE_TECHNICANT" />
+            <column name="name" value="Technicant" />
+        </insert>
+        <insert tableName="role">
+            <column name="id" value="ROLE_CUSTOMER" />
+            <column name="name" value="Customer" />
+        </insert>
+
+        <insert tableName="users">
+            <column name="first_name" value="Salonbooking" />
+            <column name="last_name" value="Manager" />
+            <column name="phone_number" value="0987654321" />
+
+            <!-- Salonbooking@123 -->
+            <column name="password" value="$2a$12$F4/ujOUbLhVOMLQaRMHDJeddhfRbge.jEhAnb9HV5TuMshe312jxi" />
+
+            <column name="role_id" value="ROLE_MANAGER" />
+
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+    </changeSet>
+    <changeSet id="add_dob_email_genter_in_table_users" author="bao.le">
+        <addColumn tableName="users">
+            <column name="dob" type="timestamp with time zone" />
+            <column name="email" type="varchar(255)">
+                <constraints unique="true" />
+            </column>
+            <column name="gender" type="varchar(255)" defaultValue="OTHER" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="drop_service_name_key_unique_constraint" author="bao.le">
+        <dropUniqueConstraint tableName="service" constraintName="service_name_key" uniqueColumns="name" />
+    </changeSet>
+    <changeSet id="import_group_and_nail_services" author="bao.le">
+        <insert tableName="groups">
+            <column name="id" value="610d73c9-0e5c-4809-b271-c80b661a0e09" />
+            <column name="name" value="manicure" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="groups">
+            <column name="id" value="407b9de3-b3b2-4f5c-8a27-8132badd0ba8" />
+            <column name="name" value="facial" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="groups">
+            <column name="id" value="1f3b2de4-8183-4282-8c4e-e67678f88dfe" />
+            <column name="name" value="eyelash extensions" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="groups">
+            <column name="id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="name" value="additional services" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="groups">
+            <column name="id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="name" value="pedicure" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="groups">
+            <column name="id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="name" value="nail enhancements" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+
+        <!-- MANICURE services -->
+        <insert tableName="service">
+            <column name="name" value="5TH - Classic Manicure" />
+            <column name="start_price" valueNumeric="23" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="610d73c9-0e5c-4809-b271-c80b661a0e09" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Deluxe Manicure" />
+            <column name="start_price" valueNumeric="33" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="610d73c9-0e5c-4809-b271-c80b661a0e09" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+
+        <!-- FACIAL servives -->
+        <insert tableName="service">
+            <column name="name" value="Revitalizing Anti-Aging Facial" />
+            <column name="start_price" valueNumeric="70" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="407b9de3-b3b2-4f5c-8a27-8132badd0ba8" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Relax Facial" />
+            <column name="start_price" valueNumeric="50" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="407b9de3-b3b2-4f5c-8a27-8132badd0ba8" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+
+        <!-- EYELASH EXTENSIONS servives -->
+        <insert tableName="service">
+            <column name="name" value="New Set(Individual)" />
+            <column name="start_price" valueNumeric="150" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1f3b2de4-8183-4282-8c4e-e67678f88dfe" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Refill" />
+            <column name="start_price" valueNumeric="50" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1f3b2de4-8183-4282-8c4e-e67678f88dfe" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="New Set(Group)" />
+            <column name="start_price" valueNumeric="50" />
+            <column name="service_price_type" value="START_PRICE_AND_ABOVE" />
+            <column name="groups_id" value="1f3b2de4-8183-4282-8c4e-e67678f88dfe" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+
+        <!-- ADDITIONAL SERVICES servives -->
+        <insert tableName="service">
+            <column name="name" value="Color Gel Polish" />
+            <column name="start_price" valueNumeric="15" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Color Gel French" />
+            <column name="start_price" valueNumeric="7" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Nail Art Design" />
+            <column name="start_price" valueNumeric="5" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Nail Repair" />
+            <column name="start_price" valueNumeric="3" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Regular Polish Change" />
+            <column name="start_price" valueNumeric="15" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Regular French Polish Change" />
+            <column name="start_price" valueNumeric="20" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Acrylic Repair" />
+            <column name="start_price" valueNumeric="5" />
+            <column name="end_price" valueNumeric="10" />
+            <column name="service_price_type" value="IN_RANGE" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Soak - Off Acrylic Gel/Dip" />
+            <column name="start_price" valueNumeric="45" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Color Powder Full Set" />
+            <column name="start_price" valueNumeric="5" />
+            <column name="end_price" valueNumeric="10" />
+            <column name="service_price_type" value="IN_RANGE" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Cat Eye Design" />
+            <column name="start_price" valueNumeric="10" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Chrome" />
+            <column name="start_price" valueNumeric="50" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Powder Full Set" />
+            <column name="start_price" valueNumeric="15" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Nail Tip Extention" />
+            <column name="start_price" valueNumeric="5" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Nail Buff &amp; Shine" />
+            <column name="start_price" valueNumeric="5" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="5d0eb22e-9573-4a83-91a2-fc9475b33455" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+
+        <!-- PEDICURE servives -->
+        <insert tableName="service">
+            <column name="name" value="5TH - Classic Spa Pedicure" />
+            <column name="start_price" valueNumeric="34" />
+            <column name="service_price_type" value="START_PRICE_AND_ABOVE" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Deluxe Spa Pedicure" />
+            <column name="start_price" valueNumeric="40" />
+            <column name="service_price_type" value="START_PRICE_AND_ABOVE" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Signature Spa Pedicure" />
+            <column name="start_price" valueNumeric="46" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Fresh Citrus Pedicure" />
+            <column name="start_price" valueNumeric="56" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Cucumber Pedicure" />
+            <column name="start_price" valueNumeric="56" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Sport Spa Pedicure" />
+            <column name="start_price" valueNumeric="56" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Milk &amp; Honey Pedicure" />
+            <column name="start_price" valueNumeric="64" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="5TH - Organic Spa Pedicure" />
+            <column name="start_price" valueNumeric="70" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="75a6acaf-9eff-4c54-ab3c-dca661c094c7" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+
+        <!-- NAIL ENHANCEMENTS servives -->
+        <insert tableName="service">
+            <column name="name" value="Acrylic Full Set" />
+            <column name="start_price" valueNumeric="38" />
+            <column name="service_price_type" value="START_PRICE_AND_ABOVE" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Acrylic Fill Ins" />
+            <column name="start_price" valueNumeric="28" />
+            <column name="service_price_type" value="START_PRICE_AND_ABOVE" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Pink &amp; White Acrylic Full Set" />
+            <column name="start_price" valueNumeric="60" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Pink &amp; White Fill Ins" />
+            <column name="start_price" valueNumeric="55" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Pink Fill Only" />
+            <column name="start_price" valueNumeric="40" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Ombre Pink Fill Ins" />
+            <column name="start_price" valueNumeric="45" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Ombre Fill Ins" />
+            <column name="start_price" valueNumeric="55" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Color Powder Fill Ins" />
+            <column name="start_price" valueNumeric="45" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Color Powder Full Set" />
+            <column name="start_price" valueNumeric="55" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Full Set (liquid)" />
+            <column name="start_price" valueNumeric="60" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Fill Ins (liquid)" />
+            <column name="start_price" valueNumeric="50" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Powder Full Set" />
+            <column name="start_price" valueNumeric="45" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Powder Fill Ins" />
+            <column name="start_price" valueNumeric="33" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Classic Manicure w/Gel Polish" />
+            <column name="start_price" valueNumeric="38" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Classic Manicure w/Gel French" />
+            <column name="start_price" valueNumeric="45" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Color Dip Powder" />
+            <column name="start_price" valueNumeric="45" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Ombre Dip Fill Ins" />
+            <column name="start_price" valueNumeric="33" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Full Set" />
+            <column name="start_price" valueNumeric="70" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Get Fill ins" />
+            <column name="start_price" valueNumeric="60" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+        <insert tableName="service">
+            <column name="name" value="Pink &amp; White Dip Powder" />
+            <column name="start_price" valueNumeric="55" />
+            <column name="service_price_type" value="START_PRICE_ONLY" />
+            <column name="groups_id" value="1cd1fe76-fa0e-407f-9e4d-f38eee0e24e6" />
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+    </changeSet>
+    <changeSet id="import_sample_technicant_user" author="bao.le">
+        <insert tableName="users">
+            <column name="first_name" value="Salonbooking" />
+            <column name="last_name" value="Technicant" />
+            <column name="phone_number" value="0987654322" />
+
+            <!-- Salonbooking@123 -->
+            <column name="password" value="$2a$12$TF9hiu0JJWiFXXwRZGpEzO7tGfy4Q42D8PIK8NTUm375Btudj7NpC" />
+
+            <column name="role_id" value="ROLE_TECHNICANT" />
+
+            <column name="created_by" value="system" />
+            <column name="created_date" valueComputed="current_timestamp" />
+            <column name="last_modified_by" value="system" />
+            <column name="last_modified_date" valueComputed="current_timestamp" />
+        </insert>
+    </changeSet>
+    <changeSet id="add_column_status_in_table_users" author="bao.le">
+        <addColumn tableName="users">
+            <column name="status" type="varchar(255)" defaultValue="ACTIVE" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="drop_column_actual_price_in_order_details" author="bao.le">
+        <dropColumn tableName="order_details" columnName="actual_price" />
+    </changeSet>
+    <changeSet id="add_columns_price_and_status_in_table_orders" author="bao.le">
+        <addColumn tableName="orders">
+            <column name="price" type="double precision" />
+            <column name="status" type="varchar(255)" defaultValue="CHECK_IN" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="add_check_out_notes_in_table_orders" author="bao.le">
+        <addColumn tableName="orders">
+            <column name="check_out_notes" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="add_column_discount_in_table_orders" author="bao.le">
+        <addColumn tableName="orders">
+            <column name="discount" type="double precision" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="drop_default_value_and_migrate_column_status_in_table_orders" author="bao.le">
+        <dropDefaultValue tableName="orders" columnName="status" />
+
+        <update tableName="orders">
+            <column name="status" value="IN_SERVICE" />
+            <where>status = 'CHECK_IN'</where>
+        </update>
+    </changeSet>
+    <changeSet id="rename_role_id_technicant_to_technician" author="bao.le">
+        <insert tableName="role">
+            <column name="id" value="ROLE_TECHNICIAN" />
+            <column name="name" value="Technician" />
+        </insert>
+
+        <update tableName="users">
+            <column name="role_id" value="ROLE_TECHNICIAN" />
+            <where>role_id = 'ROLE_TECHNICANT'</where>
+        </update>
+
+        <delete tableName="role">
+            <where>id = 'ROLE_TECHNICANT'</where>
+        </delete>
+    </changeSet>
+    <changeSet id="drop_unique_email_contraint_in_table_users" author="bao.le">
+        <dropUniqueConstraint tableName="users" constraintName="users_email_key" />
+    </changeSet>
+    <changeSet id="add_table_ordered_details" author="bao.le">
+        <createTable tableName="ordered_details">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+
+            <column name="orders_id" type="uuid">
+                <constraints foreignKeyName="fk_ordered_details_orders"
+                             referencedTableName="orders"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="employee_id" type="uuid" />
+            <column name="employee_first_name" type="varchar(255)" />
+            <column name="employee_last_name" type="varchar(255)" />
+            <column name="employee_phone_number" type="varchar(255)" />
+            <column name="service_id" type="uuid" />
+            <column name="service_name" type="varchar(255)" />
+            <column name="service_start_price" type="double precision" />
+            <column name="service_end_price" type="double precision" />
+            <column name="service_price_type" type="varchar(255)" />
+            <column name="service_group_name" type="varchar(255)" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+    </changeSet>
+    <changeSet id="add_column_status_in_table_service" author="bao.le">
+        <addColumn tableName="service">
+            <column name="status" type="varchar(255)" defaultValue="ACTIVE" />
+        </addColumn>
+    </changeSet>
+    <changeSet id="add_column_check_out_time_and_column_employee_in_table_orders" author="bao.le">
+        <addColumn tableName="orders">
+            <column name="check_out_time" type="timestamp with timezone" />
+            <column name="employee_id" type="uuid">
+                <constraints foreignKeyName="fk_orders_employee"
+                             referencedTableName="users"
+                             referencedColumnNames="id" />
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="drop_fk_order_details_users_in_table_order_details" author="bao.le">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="fk_order_details_users" />
+        </preConditions>
+        <dropForeignKeyConstraint baseTableName="order_details" constraintName="fk_order_details_users" />
+    </changeSet>
+    <changeSet id="drop_column_users_id_in_table_order_details" author="bao.le">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="order_details" columnName="users_id" />
+        </preConditions>
+        <dropColumn tableName="order_details" columnName="users_id" />
+    </changeSet>
+    <changeSet id="add_table_gift_card" author="bao.le">
+        <createTable tableName="gift_card">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+
+            <column name="code" type="varchar(255)">
+                <constraints unique="true" uniqueConstraintName="gift_card_code_key" />
+            </column>
+
+            <column name="initial_value" type="double precision" defaultValue="0" />
+            <column name="expiration_date" type="timestamp with time zone" />
+            <column name="notes" type="varchar(255)" />
+            <column name="status" type="varchar(255)" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+    </changeSet>
+    <changeSet id="add_table_customer_gift_card" author="bao.le">
+        <createTable tableName="customer_gift_card">
+            <column name="customer_id" type="uuid" />
+            <column name="gift_card_id" type="uuid" />
+            <column name="redeemed" type="boolean" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+        <addPrimaryKey tableName="customer_gift_card" columnNames="customer_id, gift_card_id" />
+    </changeSet>
+    <changeSet id="add_table_credit_configuration" author="bao.le">
+        <createTable tableName="credit_configuration">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+
+            <column name="conversion_credit" type="double precision" />
+            <column name="credit_threshold" type="double precision" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+    </changeSet>
+    <changeSet id="add_table_credit" author="bao.le">
+        <createTable tableName="credit">
+            <column name="customer_id" type="uuid">
+                <constraints foreignKeyName="fk_credit_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id" />
+            </column>
+            <column name="total_credit" type="double precision" />
+            <column name="available_credit" type="double precision" />
+            <column name="total_no_gift_card" type="integer" />
+            <column name="available_no_gift_card" type="integer" />
+            <column name="redeem_no_gift_card" type="integer" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+        <addPrimaryKey tableName="credit" columnNames="customer_id" />
+    </changeSet>
+    <changeSet id="insert_masterdata_on_table_credit_configuration" author="bao.le">
+        <insert tableName="credit_configuration">
+            <column name="conversion_credit" valueNumeric="1.0" />
+            <column name="credit_threshold" valueNumeric="600.0" />
+            <column name="created_by" value="7343248978" />
+            <column name="created_date" value="2024-06-08 09:41:00.000000+00" />
+            <column name="last_modified_by" value="7343248978" />
+            <column name="last_modified_date" value="2024-06-08 09:41:00.000000+00" />
+        </insert>
+    </changeSet>
+    <changeSet id="add_gift_card_balance_table" author="bao.le">
+        <createTable tableName="gift_card_balance">
+            <column name="customer_id" type="uuid">
+                <constraints foreignKeyName="fk_gift_card_balance_users"
+                             referencedTableName="users"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="balance" type="double precision" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+        <addPrimaryKey tableName="gift_card_balance" columnNames="customer_id" />
+    </changeSet>
+    <changeSet id="add_gift_card_balance_activity_table" author="bao.le">
+        <createTable tableName="gift_card_balance_activity">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+
+            <column name="gift_card_balance_id" type="uuid">
+                <constraints foreignKeyName="fk_gift_card_balance_activity_gift_card_balance"
+                             referencedTableName="gift_card_balance"
+                             referencedColumnNames="customer_id" />
+            </column>
+
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false" notNullConstraintName="activity_type_not_null" />
+            </column>
+
+            <column name="orders_id" type="uuid">
+                <constraints foreignKeyName="fk_gift_card_balance_activity_orders"
+                             referencedTableName="orders"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="gift_card_id" type="uuid">
+                <constraints foreignKeyName="fk_gift_card_balance_activity_gift_card"
+                             referencedTableName="gift_card"
+                             referencedColumnNames="id" />
+            </column>
+
+            <column name="amount" type="double precision" />
+            <column name="closing_balance" type="double precision" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+    </changeSet>
+    <changeSet id="init_table_schedule" author="bao.le">
+        <createTable tableName="schedule">
+            <column name="id" type="uuid" defaultValue="gen_random_uuid()">
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+
+            <column name="schedule_type" type="varchar(255)" />
+            <column name="cron_expression" type="varchar(255)" />
+            <column name="description" type="varchar(255)" />
+
+            <column name="created_by" type="varchar(255)" />
+            <column name="created_date" type="timestamp with time zone" />
+            <column name="last_modified_by" type="varchar(255)" />
+            <column name="last_modified_date" type="timestamp with time zone" />
+        </createTable>
+    </changeSet>
+    <changeSet id="load_table_schedule_update_expired_gift_card_data" author="bao.le">
+        <loadData tableName="schedule" file="db/masterdata/init_schedule_data.csv" />
+    </changeSet>
+
+</databaseChangeLog>
